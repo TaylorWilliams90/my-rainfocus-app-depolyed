@@ -11,10 +11,10 @@ const loadFields = (): PortalField[] | null => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Ensure that every field in the parsed array has an 'isActive' property set to a boolean.
+        
         const validatedFields = Array.isArray(parsed) 
           ? parsed.map(f => ({ ...f, isActive: !!f.isActive }))
-          : initialPortalFields; // Fallback to initial fields if not an array
+          : initialPortalFields; 
         
         return validatedFields;
       } catch (e) {
@@ -23,16 +23,27 @@ const loadFields = (): PortalField[] | null => {
       }
     }
   }
-  // Return null initially if no data saved, will be handled by useEffect.
+  
   return null;
 };
 
 export default function Design() {
-  const [fields, setFields] = useState<PortalField[] | null>(loadFields);
+  const [fields, setFields] = useState<PortalField[]>(initialPortalFields);
+  const [isLoaded, setIsLoaded] = useState(false);
+useEffect(() => {
+    const loadedData = loadFields();
+    if (loadedData) {
+        setFields(loadedData);
+    }
+    
+    setIsLoaded(true); 
+  }, []); 
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(fields));
-  }, [fields]);
+    if (isLoaded) { 
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(fields));
+    }
+  }, [fields, isLoaded]);
 
 
    const handleToggle = (id: string, newIsActive: boolean) => {
@@ -42,6 +53,15 @@ export default function Design() {
       )
     );
   };
+
+  if (!isLoaded) {
+      // Show a temporary loading state until localStorage check is complete
+      return <p>Loading preferences...</p>;
+  }
+
+    if (fields === null) {
+    return null; 
+  }
 
   return (
     <div className="design">
