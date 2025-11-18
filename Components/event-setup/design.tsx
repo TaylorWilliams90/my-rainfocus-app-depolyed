@@ -28,7 +28,7 @@ const loadFields = (): PortalField[] | null => {
 };
 
 export default function Design() {
-  const [fields, setFields] = useState<PortalField[]>(loadFields);
+  const [fields, setFields] = useState<PortalField[] | null>(loadFields);
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(fields));
@@ -57,3 +57,4 @@ export default function Design() {
     </div>
   );
 }
+
