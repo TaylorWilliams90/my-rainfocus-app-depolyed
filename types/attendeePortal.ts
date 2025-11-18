@@ -2,33 +2,38 @@ export interface PortalField {
   id: string;
   fieldLabel: string;
   content: string;
-  
+  isActive: boolean;
 }
 
 export const initialPortalFields: PortalField[] = [
   {
     id: 'field-1',
     fieldLabel: 'My Registration',
-    content: 'Display registration tier (e.g., VIP Pass, General Admission). Allow them to download or print their digital pass/QR code.'
+    content: 'Display registration tier (e.g., VIP Pass, General Admission). Allow them to download or print their digital pass/QR code.',
+    isActive: false
   },
   {
     id: 'field-2',
     fieldLabel: 'Build My Schedule',
-    content: 'A powerful link to the session catalog and scheduling tool. Should show currently booked sessions, if any.'
+    content: 'A powerful link to the session catalog and scheduling tool. Should show currently booked sessions, if any.',
+    isActive: false
   },
   {
     id: 'field-3',
     fieldLabel: 'Housing & Travel',
-    content: 'Provide confirmed hotel details if booked, or links to the official booking site and travel guides.'
+    content: 'Provide confirmed hotel details if booked, or links to the official booking site and travel guides.',
+    isActive: false
   },
   {
     id: 'field-4',
     fieldLabel: 'Networking Hub',
-    content: 'Access to the attendee directory to find peers, speakers, or sponsors, and schedule 1:1 meetings.'
+    content: 'Access to the attendee directory to find peers, speakers, or sponsors, and schedule 1:1 meetings.',
+    isActive: false
   },
   {
     id: 'field-5',
     fieldLabel: 'FAQ/Support',
-    content: 'Quick access to the help documentation, support contacts, or a chatbot.'
+    content: 'Quick access to the help documentation, support contacts, or a chatbot.',
+    isActive: false
   },
 ];
