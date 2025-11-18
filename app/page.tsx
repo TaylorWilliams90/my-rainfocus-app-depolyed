@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Base from '../Components/event-setup/base';
 import Build from '../Components/event-setup/build';
 import Design from '../Components/event-setup/design';
@@ -23,12 +24,46 @@ const initialEventInfo: EventInfo = {
     location: "Lehi, Utah",
 };
 
+const TRANSITION_DURATION = 300; 
+
 export default function Home() {
+
+  const router = useRouter();
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [eventInfo, setEventInfo] = useState<EventInfo>(initialEventInfo);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isModalClosing, setIsModalClosing] = useState(false); 
   const [tempEventInfo, setTempEventInfo] = useState<EventInfo>(initialEventInfo);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+
+    const storedEventInfo = localStorage.getItem('eventInfo');
+    if (storedEventInfo) {
+      try {
+        const parsedInfo: EventInfo = JSON.parse(storedEventInfo);
+
+        setEventInfo(parsedInfo);
+        setTempEventInfo(parsedInfo);
+      } catch (error) {
+        console.error("Failed to parse eventInfo from localStorage", error);
+
+        setEventInfo(initialEventInfo);
+        setTempEventInfo(initialEventInfo);
+      }
+    }
+
+    setIsLoaded(true);
+  }, []);
+
+
+  useEffect(() => {
+
+    if (isLoaded) {
+      localStorage.setItem('eventInfo', JSON.stringify(eventInfo));
+    }
+  }, [eventInfo, isLoaded]);
 
   const CurrentComponent = STEPS[currentStepIndex].Component;
   const hasPreviousStep = currentStepIndex > 0;
@@ -39,7 +74,8 @@ export default function Home() {
       setCurrentStepIndex(prevIndex => prevIndex + 1);
     }
     else {
-      alert("Setup complete!");
+      console.log("Setup complete!");
+      router.push('/finished');
     }
   };
   const handlePrevious = () => {
@@ -49,12 +85,20 @@ export default function Home() {
   };
 
    const openEditModal = () => {
-    setTempEventInfo(eventInfo); // Load current data into temp state for editing
-    setIsEditModalOpen(true);
+    setTempEventInfo(eventInfo);
+    setTimeout(() => {
+      setIsModalClosing(false);
+      setIsEditModalOpen(true);
+    }, TRANSITION_DURATION);
   };
 
   const closeEditModal = () => {
-    setIsEditModalOpen(false);
+    setIsModalClosing(true); 
+    setTempEventInfo(eventInfo);
+    setTimeout(() => {
+      setIsEditModalOpen(false);
+      setIsModalClosing(false);
+    }, TRANSITION_DURATION);
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,8 +115,9 @@ export default function Home() {
         return;
     }
     setEventInfo(tempEventInfo); 
-    closeEditModal();
+    setIsEditModalOpen(false);
   };
+   const modalClass = `modal-background ${isModalClosing ? 'fading-out' : 'fading-in'}`;
 
   return (
     <div className="wrapper-layout">
@@ -126,14 +171,14 @@ export default function Home() {
               Next Step ({STEPS[currentStepIndex + 1].name})
             </button>
           ) : (
-            <button disabled>
+            <button onClick={handleNext}>
               Finish Setup
             </button>
           )}
         </div>
       </div>
       {isEditModalOpen && (
-        <div className='modal-background ' >
+        <div className={modalClass} >
           <div className="modal-wrapper">
             <div className="modal-body">
               <h3>Edit Event Details</h3>

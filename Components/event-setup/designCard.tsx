@@ -1,10 +1,15 @@
 import React from 'react'
 import { PortalField } from '../../types/attendeePortal'; 
 interface CardProps {
-  field: PortalField;
+   field: PortalField;
+  onToggle: (id: string, newIsActive: boolean) => void;
 }
 
-const BuildCard: React.FC<CardProps> = ({ field }) => {
+const DesignCard: React.FC<CardProps> = ({ field, onToggle }) => {
+  
+const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  onToggle(field.id, e.target.checked);
+}; 
   return (
     <div className="card-box">
       <div className="reg-title">
@@ -18,7 +23,7 @@ const BuildCard: React.FC<CardProps> = ({ field }) => {
        <h5>{field.content}</h5>
       </div>
       <div className="toggle-wrapper">
-        <input type="checkbox" className='toggle' name={field.fieldLabel} id={field.id} />
+        <input type="checkbox" className='toggle' name={field.fieldLabel} id={field.id} checked={!!field.isActive} onChange={handleToggleChange} />
         <label htmlFor={field.id}>on</label>
       </div>
       
@@ -26,4 +31,4 @@ const BuildCard: React.FC<CardProps> = ({ field }) => {
   )
 }
 
-export default BuildCard
+export default DesignCard;

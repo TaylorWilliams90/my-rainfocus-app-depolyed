@@ -1,7 +1,7 @@
 'use client';
 import Card from './buildCard';
 import { initialRegistrationFields, RegistrationField } from '../../types/attendeeReg';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 type NewFieldState = Omit<RegistrationField, 'id'>;
 
@@ -12,16 +12,40 @@ const initialNewFieldData: NewFieldState = {
   isActive: true,
 };
 
+const LOCAL_STORAGE_KEY = 'eventBuildWorkflow';
+
+const loadFields = (): RegistrationField[] => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed : initialRegistrationFields;
+      } catch (e) {
+        console.error("Error parsing registration fields from localStorage:", e);
+        return initialRegistrationFields;
+      }
+    }
+  }
+
+  return initialRegistrationFields;
+};
+
 export default function Build() {
 
-  const [fields, setFields] = useState<RegistrationField[]>(initialRegistrationFields);
-  
- 
+  const [fields, setFields] = useState<RegistrationField[]>(loadFields);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-
   const [newFieldData, setNewFieldData] = useState<NewFieldState>(initialNewFieldData);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(fields));
+    
+    if (saveMessage === 'Registration field added successfully!') {
+        const timer = setTimeout(() => setSaveMessage(null), 3000);
+        return () => clearTimeout(timer);
+    }
+  }, [fields]);
 
   const handleNewFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -151,7 +175,7 @@ export default function Build() {
                   Cancel
                 </button>
                 <button onClick={handleAddField} className="btn save-btn">
-                  Save Field
+                  Save
                 </button>
               </div>
             </div>

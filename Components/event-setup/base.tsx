@@ -1,23 +1,48 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BaseSettingsData, EventFormat } from '../../types/event';
 
-export default function Base() {
-  const [baseSettings, setBaseSettings] = useState<BaseSettingsData>({
-    eventFormat: 'In-Person', 
+const LOCAL_STORAGE_KEY = 'eventSetup_BaseSettings';
+
+const loadSettings = (): BaseSettingsData => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  }
+  return {
+    eventFormat: 'In-Person' as EventFormat,
     capacityLimit: null,
     primaryLanguage: 'English',
     registrationStartTime: '',
     registrationEndTime: '',
-  });
+  };
+};
+
+export default function Base() {
+  const [baseSettings, setBaseSettings] = useState<BaseSettingsData>(loadSettings);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Save to localStorage
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(baseSettings));
+    // Clear any previous message after a short delay
+    const timer = setTimeout(() => setSaveMessage(null), 3000);
+    return () => clearTimeout(timer);
+  }, [baseSettings]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
 
-    const updatedValue = name === 'capacityLimit' ? (value ? parseInt(value) : null) : value;
+    let updatedValue: string | number | null = value;
+    
+    if (name === 'capacityLimit') {
+      updatedValue = value ? parseInt(value) : null;
+    }
 
     setBaseSettings(prevSettings => ({
       ...prevSettings,
@@ -27,6 +52,7 @@ export default function Base() {
 
 
   const handleSave = () => {
+    setSaveMessage('Settings saved successfully!');
     console.log('Saving Base Settings:', baseSettings);
 
   };
@@ -103,6 +129,7 @@ export default function Base() {
 
         <div className='base-save'>
         <button onClick={handleSave}>Save Base Settings</button>
+        {saveMessage && <p>{saveMessage}</p>}
         </div>
 
     </div>
